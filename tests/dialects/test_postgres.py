@@ -189,6 +189,26 @@ class TestPostgres(Validator):
         )
         self.validate_identity("SELECT e'\\n'")
         self.validate_identity("SELECT e'\\t'")
+        self.validate_all(
+            "SELECT e'a\\nb'",
+            read={"postgres": "SELECT E'a\\nb'"},
+            write={"sqlite": "SELECT 'a\nb'"},
+        )
+        self.validate_all(
+            "SELECT e'a\\tb'",
+            read={"postgres": "SELECT E'a\\tb'"},
+            write={"sqlite": "SELECT 'a\tb'"},
+        )
+        self.validate_all(
+            "SELECT e'a''b'",
+            read={"postgres": "SELECT E'a\\'b'"},
+            write={"sqlite": "SELECT 'a''b'"},
+        )
+        self.validate_all(
+            "SELECT LENGTH(e'a\\nb')",
+            read={"postgres": "SELECT LENGTH(E'a\\nb')"},
+            write={"sqlite": "SELECT LENGTH('a\nb')"},
+        )
         self.validate_identity(
             "SELECT e'update table_name set a = \\'foo\\' where 1 = 0' AS x FROM tab",
             "SELECT e'update table_name set a = ''foo'' where 1 = 0' AS x FROM tab",
